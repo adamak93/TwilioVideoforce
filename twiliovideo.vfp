@@ -1,0 +1,113 @@
+<apex:page showheader="false">
+  <title>Twilio-Force Proof of Concept</title>
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"/>
+    <apex:stylesheet value="https://static0.twilio.com/packages/quickstart/client.css"/>
+    <apex:includeScript value="https://media.twiliocdn.com/sdk/js/client/v1.3/twilio.min.js"/>
+    <apex:includeScript value="https://media.twiliocdn.com/sdk/js/common/v0.1/twilio-common.min.js"/>
+   <apex:includeScript value="https://media.twiliocdn.com/sdk/js/conversations/v0.13/twilio-conversations.min.js"/>
+    <script type="text/javascript">
+    var previewMedia;
+    var identity;
+    var conversationsClient;
+    var activeConversation;
+    
+	  if (!navigator.webkitGetUserMedia && !navigator.mozGetUserMedia) {
+    	alert('WebRTC is not available in your browser.');
+    }
+    
+    $.getJSON('https://c7fa8bd1.ngrok.io/tokensf.php', function(data) {
+        //Print Token and identity to Console
+        console.log(data.token);
+        console.log(data.identity);
+        //Declare AccessManager With Token 
+        var accessManager = new Twilio.AccessManager(data.token);
+        // Establish Twilio Connection 
+		conversationsClient = new Twilio.Conversations.Client(accessManager);
+		conversationsClient.listen().then(
+            clientConnected,function (error) {
+                $("#log").text('Could not connect to Twilio: ' + error.message);
+	});
+   
+   });
+	
+    //Successfully Connected to Twilio
+   function clientConnected() {
+        $("#log").text("Connected. Listening  as '" + conversationsClient.identity + "'");
+        conversationsClient.on('invite', function (invite) {
+            $("#log").text('Incoming invite from: ' + invite.from);
+            invite.accept().then(conversationStarted);
+        });
+    // bind button to create conversation
+  document.getElementById('button-invite').onclick = function () {
+    var inviteTo = document.getElementById('invite-to').value;
+      document.getElementById('invite-to').value="";
+    if (activeConversation) {
+      // add a participant
+       $("#log").text('Invite sent. Awaiting response.');
+      activeConversation.invite(inviteTo);
+    } else {
+      // create a conversation
+      var options = {};
+        $("#log").text('Invite sent. Awaiting response.');
+      conversationsClient.inviteToConversation(inviteTo, options).then(
+        conversationStarted,
+        function (error) {
+          $("#log").text('Unable to create conversation');
+          console.error('Unable to create conversation', error);
+        });
+    }
+  };
+};
+    
+     //Conversation is active
+    function conversationStarted(conversation) {
+        activeConversation = conversation
+        // when a participant joins, obtain remote video + Audio signal, print to console.
+        conversation.on('participantConnected', function (participant) {
+            $("#log").text("Participant '" + participant.identity + "' connected");
+            participant.media.attach('#remote-media');
+        });
+       
+        conversation.on('participantDisconnected', function (participant) {
+            $("#log").text( "'"+ participant.identity + "' disconnected. Listening as: '" + conversationsClient.identity + "'");
+        });
+        
+        conversation.on('ended', function (conversation) {
+            conversation.localMedia.stop();
+            conversation.disconnect();
+            activeConversation = null;
+        });
+    //Bind Button to stop Conversation
+	document.getElementById('hangup').onclick = function (){
+        if (activeConversation) {
+         activeConversation = null;
+    	conversation.disconnect();
+         conversation.localMedia.stop();
+        };
+ };   
+};   
+    //Preview Camera
+    previewMedia = new Twilio.Conversations.LocalMedia();
+    previewMedia.addCamera().then(function(cameraTrack) {
+    cameraTrack.attach('#local-media');
+  }, function(error) {
+      $("#log").text('Unable to get access to the local camera.');
+  }); 
+    </script>
+    <div height="100%" width="100%" class="bg"> '
+        <div id="buttons">
+      		<button class = "call" id="button-invite">Send Invite</button>
+      		<button class="hangup" id="hangup">Hangup</button>
+        </div>     
+       	<div id="invite-controls" style="padding-bottom:2%;" >
+            <input id="invite-to" type="text" placeholder="Identity to send an invite to"/>
+        </div>
+        <h1>Participant</h1>
+        	<div id ="remote-media" style="padding-top:2%"></div>
+        <h1> Preview </h1>
+        	<div style="padding-top:2%;">
+                <video width="23%" height="20%" id ="local-media"></video>
+             </div>
+   		<div id="log">Connecting...</div>
+    </div> 
+</apex:page>
