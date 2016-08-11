@@ -6,30 +6,31 @@
     <apex:includeScript value="https://media.twiliocdn.com/sdk/js/common/v0.1/twilio-common.min.js"/>
    <apex:includeScript value="https://media.twiliocdn.com/sdk/js/conversations/v0.13/twilio-conversations.min.js"/>
     <script type="text/javascript">
+    //Variable Declaration
     var previewMedia;
     var identity;
     var conversationsClient;
     var activeConversation;
-    
+    //WebRTC Verification
 	  if (!navigator.webkitGetUserMedia && !navigator.mozGetUserMedia) {
     	alert('WebRTC is not available in your browser.');
     }
-    
-    $.getJSON('https://c7fa8bd1.ngrok.io/tokensf.php', function(data) {
+    //Retreive identity and token to securely connect to Twilio's servers. 
+    //Remember to use HTTPS for secure connection as insecure HTTP will be REFUSED by Twilio's servers. 
+    $.getJSON('Insert NGrok or webserver of your choice/tokensf.php', function(data) {
         //Print Token and identity to Console
         console.log(data.token);
         console.log(data.identity);
         //Declare AccessManager With Token 
         var accessManager = new Twilio.AccessManager(data.token);
         // Establish Twilio Connection 
-		conversationsClient = new Twilio.Conversations.Client(accessManager);
-		conversationsClient.listen().then(
+	conversationsClient = new Twilio.Conversations.Client(accessManager);
+	conversationsClient.listen().then(
             clientConnected,function (error) {
                 $("#log").text('Could not connect to Twilio: ' + error.message);
 	});
    
    });
-	
     //Successfully Connected to Twilio
    function clientConnected() {
         $("#log").text("Connected. Listening  as '" + conversationsClient.identity + "'");
