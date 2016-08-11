@@ -4,7 +4,7 @@ require_once('./config.php');
 //require_once('./randos.php');
  header("Access-Control-Allow-Origin: *");
 
-// An identifier for your app - can be anything you'd like
+// An identifier for your app
 $appName = 'TwilioVideo';
 
 // choose a username for the connecting user
