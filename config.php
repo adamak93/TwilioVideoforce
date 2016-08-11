@@ -1,7 +1,8 @@
 <?php
 
 // see README.md for an explanation of these config params
-$TWILIO_ACCOUNT_SID = 'ACa3ea4fa6bd4c0ac1ec4a29726f909a86';
-$TWILIO_CONFIGURATION_SID = 'VSead1bc7b56ddc585820b627685b42101';
-$TWILIO_API_KEY = 'SK607c684bf71e952cf74047c187c38770';
-$TWILIO_API_SECRET = 'UXL1xQ6TdSw2C6NhQHInqnFxnv5ZfgcK';
+// Replace all values between '' with values that you have found from the domains listed.
+$TWILIO_ACCOUNT_SID = 'Found in Your Twilio Dashboard: https://www.twilio.com/console ';
+$TWILIO_CONFIGURATION_SID = 'Generate one here: https://www.twilio.com/console/video/profiles/create ';
+$TWILIO_API_KEY = 'Generate here: https://www.twilio.com/console/video/dev-tools/api-keys/create ';
+$TWILIO_API_SECRET = 'Generate here: https://www.twilio.com/console/video/dev-tools/api-keys/create ';
